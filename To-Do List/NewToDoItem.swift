@@ -11,6 +11,9 @@ struct NewToDoItem: View {
     @State var title: String
     @State var isImportant: Bool
     
+    @Binding var showNewTask : Bool
+    @Environment(\.managedObjectContext) var context
+    
     var body: some View {
         VStack {
             // title
@@ -28,11 +31,14 @@ struct NewToDoItem: View {
             // toggle
             Toggle(isOn: $isImportant) {
                 Text("Is it important?")
+                    
             }
             .padding()
             
             // button
             Button(action: {
+                self.addTask(title: self.title, isImportant: self.isImportant)
+                self.showNewTask = false
 
                         }) {
                             Text("Add")
@@ -43,10 +49,23 @@ struct NewToDoItem: View {
                         .padding()
         }
     }
+    private func addTask(title: String, isImportant: Bool = false) {
+            
+        let task = ToDo(context: context)
+        task.id = UUID()
+        task.title = title
+        task.isImportant = isImportant
+                
+        do {
+           try context.save()
+        } catch {
+           print(error)
+            }
+        }
 }
 
 struct NewToDoItem_Previews: PreviewProvider {
     static var previews: some View {
-        NewToDoItem(title: "", isImportant: false)
+        NewToDoItem(title: "", isImportant: false, showNewTask: .constant(true))
     }
 }
